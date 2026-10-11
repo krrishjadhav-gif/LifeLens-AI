@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLens AI - Intelligent Healthcare Decision Support</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js for interactive vitals charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- ==========================================
+       SIDEBAR NAVIGATION
+       ========================================== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-symbol">⚕️</div>
+      <div class="brand-text">
+        <h1>LifeLens <span>AI</span></h1>
+        <span>Healthcare Intelligence</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="#dashboard" onclick="setActiveNav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#assessmentFormPanel" onclick="setActiveNav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        New Assessment
+      </a>
+      <a class="nav-item" href="#vitalsChartPanel" onclick="setActiveNav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        Vitals & Metrics
+      </a>
+      <a class="nav-item" href="#aiInsightsPanel" onclick="setActiveNav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        AI Diagnosis & Care
+      </a>
+      <a class="nav-item" href="#historySection" onclick="setActiveNav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Patient History
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-badge">
+        <div class="user-avatar">DR</div>
+        <div>
+          <div style="font-size: 0.88rem; font-weight: 700;">Dr. Clinical AI</div>
+          <div style="font-size: 0.75rem; color: var(--teal); font-weight: 600;">Decision Assistant</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==========================================
+       MAIN CONTENT WRAPPER
+       ========================================== -->
+  <div class="main-wrapper" id="dashboard">
+
+    <!-- Top Navigation Bar -->
+    <header class="top-navbar">
+      <div class="top-navbar-left">
+        <h2 class="page-headline">Clinical Health Dashboard</h2>
+      </div>
+
+      <div class="top-navbar-right">
+        <!-- Live Backend Status Pill -->
+        <div class="backend-status-pill" id="backendStatusPill" title="Checks Flask Backend at http://127.0.0.1:5000/api/health">
+          <span class="pulse-dot" id="pulseDot"></span>
+          <span id="backendStatusLabel">Checking Backend...</span>
+        </div>
+
+        <button class="preset-btn" style="background: var(--teal-light); color: var(--teal-dark); border-color: var(--teal);" onclick="checkBackendHealth()">
+          🔄 Re-check Backend
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Body -->
+    <main class="content-body">
+
+      <!-- Hero Banner with 1-Click Quick Testing Presets -->
+      <section class="hero-banner">
+        <div class="hero-text">
+          <h2>Predictive Clinical Decision Support</h2>
+          <p>Analyze patient vitals, calculate biometric health risks, and generate personalized evidence-based AI health recommendations.</p>
+        </div>
+        <div class="hero-actions">
+          <button type="button" class="preset-btn" onclick="applyPreset('healthy')">⚡ Normal Healthy</button>
+          <button type="button" class="preset-btn" onclick="applyPreset('hypertension')">⚡ Hypertension Risk</button>
+          <button type="button" class="preset-btn" onclick="applyPreset('diabetic')">⚡ Metabolic Alert</button>
+        </div>
+      </section>
+
+      <!-- Key Health Metrics Row -->
+      <section class="metrics-row">
+        <!-- Metric 1: Health Score -->
+        <div class="metric-card">
+          <div class="metric-icon icon-teal">🛡️</div>
+          <div class="metric-info">
+            <h4>Overall Health Index</h4>
+            <div class="metric-value" id="cardHealthScore">88 <span style="font-size: 0.9rem; font-weight: 500;">/ 100</span></div>
+            <div class="metric-sub status-optimal" id="cardHealthStatus">● Optimal Range</div>
+          </div>
+        </div>
+
+        <!-- Metric 2: Blood Pressure -->
+        <div class="metric-card">
+          <div class="metric-icon icon-blue">❤️</div>
+          <div class="metric-info">
+            <h4>Blood Pressure</h4>
+            <div class="metric-value" id="cardBp">120/80 <span style="font-size: 0.85rem; font-weight: 500;">mmHg</span></div>
+            <div class="metric-sub status-optimal" id="cardBpStatus">● Normal Normotensive</div>
+          </div>
+        </div>
+
+        <!-- Metric 3: Blood Glucose -->
+        <div class="metric-card">
+          <div class="metric-icon icon-purple">🩸</div>
+          <div class="metric-info">
+            <h4>Fasting Glucose</h4>
+            <div class="metric-value" id="cardGlucose">95 <span style="font-size: 0.85rem; font-weight: 500;">mg/dL</span></div>
+            <div class="metric-sub status-optimal" id="cardGlucoseStatus">● Normal Euglycemia</div>
+          </div>
+        </div>
+
+        <!-- Metric 4: Resting Heart Rate -->
+        <div class="metric-card">
+          <div class="metric-icon icon-amber">💓</div>
+          <div class="metric-info">
+            <h4>Resting Heart Rate</h4>
+            <div class="metric-value" id="cardHr">72 <span style="font-size: 0.85rem; font-weight: 500;">BPM</span></div>
+            <div class="metric-sub status-optimal" id="cardHrStatus">● Normal Sinus Rhythm</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Core Split Layout: Form & AI Analysis -->
+      <div class="dashboard-grid">
+
+        <!-- LEFT PANEL: Health Assessment Form -->
+        <section class="panel-card" id="assessmentFormPanel">
+          <div class="panel-header">
+            <h3 class="panel-title">🩺 Patient Health Assessment Form</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Biometric & Lifestyle Inputs</span>
+          </div>
+
+          <form id="healthForm" onsubmit="handleAssessmentSubmit(event)">
+
+            <!-- Demographics -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="patientName">Patient Name</label>
+                <input type="text" id="patientName" class="form-input" value="Alex Morgan" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="patientAge">Age (Years)</label>
+                <input type="number" id="patientAge" class="form-input" min="1" max="120" value="28" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="patientGender">Biological Gender</label>
+                <select id="patientGender" class="form-select">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Calculated BMI</label>
+                <div style="display: flex; align-items: center; gap: 0.5rem; height: 38px;">
+                  <span id="bmiDisplay" style="font-size: 1.15rem; font-weight: 800; color: var(--teal);">22.9</span>
+                  <span id="bmiCategory" class="badge-risk badge-risk-low">Normal</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vitals Measurements -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="bpSystolic">Systolic BP (mmHg)</label>
+                <input type="number" id="bpSystolic" class="form-input" min="70" max="240" value="120" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="bpDiastolic">Diastolic BP (mmHg)</label>
+                <input type="number" id="bpDiastolic" class="form-input" min="40" max="150" value="80" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="bloodGlucose">Fasting Glucose (mg/dL)</label>
+                <input type="number" id="bloodGlucose" class="form-input" min="40" max="400" value="95" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="heartRate">Heart Rate (BPM)</label>
+                <input type="number" id="heartRate" class="form-input" min="40" max="200" value="72" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="heightCm">Height (cm)</label>
+                <input type="number" id="heightCm" class="form-input" min="100" max="250" value="175" oninput="calculateBmi()">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="weightKg">Weight (kg)</label>
+                <input type="number" id="weightKg" class="form-input" min="30" max="250" value="70" oninput="calculateBmi()">
+              </div>
+            </div>
+
+            <!-- Lifestyle Sliders -->
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Daily Sleep Duration</span>
+                <span class="slider-val" id="sleepVal">7.5 hrs</span>
+              </div>
+              <input type="range" id="sleepSlider" class="range-input" min="4" max="12" step="0.5" value="7.5" oninput="updateSliderVal('sleepVal', this.value + ' hrs')">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span>Weekly Physical Exercise</span>
+                <span class="slider-val" id="exerciseVal">4 days / week</span>
+              </div>
+              <input type="range" id="exerciseSlider" class="range-input" min="0" max="7" step="1" value="4" oninput="updateSliderVal('exerciseVal', this.value + ' days / week')">
+            </div>
+
+            <!-- Reported Symptoms -->
+            <div class="form-group">
+              <label class="form-label">Reported Symptoms (Check all that apply):</label>
+              <div class="symptoms-grid">
+                <label class="symptom-tag"><input type="checkbox" id="symFatigue"> Fatigue</label>
+                <label class="symptom-tag"><input type="checkbox" id="symHeadache"> Headache</label>
+                <label class="symptom-tag"><input type="checkbox" id="symDizziness"> Dizziness</label>
+                <label class="symptom-tag"><input type="checkbox" id="symShortnessOfBreath"> Shortness of Breath</label>
+                <label class="symptom-tag"><input type="checkbox" id="symChestPain"> Chest Discomfort</label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <span class="spinner-icon" id="spinner"></span>
+              <span id="submitBtnText">⚡ Run LifeLens AI Health Assessment</span>
+            </button>
+
+          </form>
+        </section>
+
+        <!-- RIGHT PANEL: AI Analysis & Vitals Chart -->
+        <section class="panel-card" id="aiInsightsPanel">
+          <div class="panel-header">
+            <h3 class="panel-title">🤖 LifeLens AI Clinical Insights</h3>
+            <span class="ai-badge">Gemini Model</span>
+          </div>
+
+          <!-- Risk Level Indicator -->
+          <div class="risk-level-banner risk-low" id="riskBanner">
+            <div>
+              <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; opacity: 0.8;">Clinical Health Risk Profile</div>
+              <div style="font-size: 1.35rem; font-weight: 800;" id="riskLevelTitle">Low Risk (Optimal)</div>
+            </div>
+            <div style="font-size: 2rem;" id="riskIcon">🛡️</div>
+          </div>
+
+          <!-- Clinical Summary -->
+          <div style="font-size: 0.92rem; color: var(--text-main); margin-bottom: 1.25rem;" id="aiClinicalSummary">
+            Patient vitals demonstrate strong hemodynamic stability. Blood pressure and fasting glucose parameters are within optimal cardioprotective thresholds.
+          </div>
+
+          <!-- Actionable AI Recommendations List -->
+          <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--teal-dark);">📋 Actionable Recommendations</h4>
+          <div class="recommendations-list" id="recommendationsList">
+            <!-- Injected via JavaScript -->
+          </div>
+
+          <!-- Interactive Vitals Chart -->
+          <div class="panel-header" style="margin-top: 1.5rem;" id="vitalsChartPanel">
+            <h4 class="panel-title" style="font-size: 1rem;">📊 Biomarker Biometrics vs Normal Baseline</h4>
+          </div>
+          <div class="chart-container">
+            <canvas id="vitalsChart"></canvas>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- BOTTOM: Patient Assessment History -->
+      <section class="panel-card" id="historySection">
+        <div class="panel-header">
+          <h3 class="panel-title">📁 Assessment History Log</h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);"><span id="historyRecordCount">0</span> Records Found</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Age / Gender</th>
+                <th>Blood Pressure</th>
+                <th>Glucose</th>
+                <th>Heart Rate</th>
+                <th>Health Score</th>
+                <th>Risk Profile</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <!-- Dynamically populated from localStorage -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

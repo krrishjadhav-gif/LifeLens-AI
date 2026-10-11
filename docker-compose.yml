@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql-db:
+    image: mysql:8.0
+    container_name: lifelens-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-lifelensdb}
+      MYSQL_USER: ${DB_USERNAME:-lifelens}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-lifelenspassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Spring Boot Java 17 Backend Service
+  lifelens-app:
+    build: .
+    container_name: lifelens-backend
+    restart: on-failure
+    depends_on:
+      - mysql-db
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql-db:3306/${DB_NAME:-lifelensdb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME:-lifelens}
+      DB_PASSWORD: ${DB_PASSWORD:-lifelenspassword}
+      DB_DRIVER: com.mysql.cj.jdbc.Driver
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+
+volumes:
+  mysql_data:

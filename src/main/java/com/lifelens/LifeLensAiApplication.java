@@ -1,0 +1,13 @@
+package com.lifelens;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class LifeLensAiApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(LifeLensAiApplication.class, args);
+    }
+
+}

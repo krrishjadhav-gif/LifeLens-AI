@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLens AI - Intelligent Decision Support System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Markdown parser for rendering AI responses cleanly -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">L</div>
+      <div>
+        <div class="brand-title">
+          LifeLens AI
+          <span class="badge-ai">Gemini AI</span>
+        </div>
+        <small style="color: var(--text-muted); font-size: 0.75rem;">Multi-Criteria Decision Intelligence</small>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="status-indicator">
+        <span class="dot" id="backendDot"></span>
+        <span id="backendStatus">Checking Backend...</span>
+      </div>
+      <button class="btn btn-secondary" onclick="scrollToHistory()">📁 Saved Decisions (<span id="historyCount">0</span>)</button>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="app-container">
+
+    <!-- LEFT COLUMN: Decision Matrix Creator Form -->
+    <section>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">✨ Create Decision</h2>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Step-by-step Weighted Model</span>
+        </div>
+
+        <!-- Quick Presets -->
+        <div style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="font-size: 0.8rem; color: var(--text-muted);">⚡ Quick Templates (1-Click Test):</label>
+          <div class="presets-bar">
+            <button type="button" class="preset-chip" onclick="loadPreset('job')">💼 Job Offer Evaluation</button>
+            <button type="button" class="preset-chip" onclick="loadPreset('laptop')">💻 Laptop Purchase</button>
+            <button type="button" class="preset-chip" onclick="loadPreset('college')">🎓 College Major Selection</button>
+          </div>
+        </div>
+
+        <form id="decisionForm" onsubmit="handleAnalyzeDecision(event)">
+
+          <!-- 1. Decision Info -->
+          <div class="form-group">
+            <label class="form-label" for="decisionTitle">Decision Title *</label>
+            <input type="text" id="decisionTitle" class="form-control" placeholder="e.g., Selecting My Next Software Role" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="decisionCategory">Category</label>
+              <select id="decisionCategory" class="form-control">
+                <option value="Career">Career & Jobs</option>
+                <option value="Education">Education & Courses</option>
+                <option value="Tech">Technology & Hardware</option>
+                <option value="Finance">Finance & Investment</option>
+                <option value="Personal">Personal & Lifestyle</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="decisionDesc">Short Context / Notes</label>
+              <input type="text" id="decisionDesc" class="form-control" placeholder="Optional context for AI analysis...">
+            </div>
+          </div>
+
+          <!-- 2. Criteria & Weights -->
+          <div style="margin-top: 1.5rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 600;">⚖️ Decision Criteria & Weights</h3>
+              <p style="font-size: 0.78rem; color: var(--text-muted);">Set how much each factor matters to you (1 = Low, 10 = High Priority)</p>
+            </div>
+            <button type="button" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="addCriterionRow()">+ Add Factor</button>
+          </div>
+
+          <div id="criteriaList">
+            <!-- Dynamic Criteria Rows Inserted Here -->
+          </div>
+
+          <!-- 3. Alternatives & Scores -->
+          <div style="margin-top: 1.5rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 600;">🎯 Options (Alternatives) to Compare</h3>
+              <p style="font-size: 0.78rem; color: var(--text-muted);">Rate each alternative on a scale of 1 to 10 for each criterion</p>
+            </div>
+            <button type="button" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="addAlternativeCard()">+ Add Alternative</button>
+          </div>
+
+          <div id="alternativesList">
+            <!-- Dynamic Alternatives Cards Inserted Here -->
+          </div>
+
+          <!-- Submit Button -->
+          <div style="margin-top: 1.75rem;">
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block btn-lg">
+              <span id="btnText">🧠 Run Decision Matrix & Gemini AI Analysis</span>
+              <span id="btnSpinner" class="spinner" style="display: none;"></span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: Evaluation, Ranking & AI Insights -->
+    <section>
+      <div id="emptyResultsState" class="card empty-placeholder">
+        <div class="empty-icon">📊</div>
+        <h3 style="font-weight: 600; margin-bottom: 0.5rem;">No Decision Evaluated Yet</h3>
+        <p style="font-size: 0.875rem;">Fill out the form on the left or select a 1-Click Quick Template to calculate weighted rankings and generate AI advice.</p>
+      </div>
+
+      <div id="resultsContainer" style="display: none;">
+        <!-- Top Winner Announcement Banner -->
+        <div class="winner-banner">
+          <div class="winner-crown">👑</div>
+          <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">Top Recommended Choice</div>
+          <div class="winner-title" id="winnerName">Alternative 1</div>
+          
+          <div class="winner-meta">
+            <div class="winner-meta-item">Score: <span id="winnerScore">0.00</span> / 10</div>
+            <div class="winner-meta-item">Alignment: <span id="winnerAlignment">0%</span></div>
+            <div class="winner-meta-item">Margin: <span id="winnerMargin">+0.0</span></div>
+          </div>
+        </div>
+
+        <!-- Full Ranked Alternatives List -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">🏆 Ranked Leaderboard</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Weighted Score & Progress</span>
+          </div>
+          <div id="rankedList">
+            <!-- Ranked Items Injected Here -->
+          </div>
+        </div>
+
+        <!-- Gemini AI Explanation Card -->
+        <div class="card ai-box">
+          <div class="ai-header">
+            <span>✨</span> Gemini AI Intelligent Explanation & Tradeoffs
+          </div>
+          <div class="ai-content" id="aiExplanationText">
+            <!-- Formatted Markdown AI Response -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM: Saved Decision History Section -->
+  <section class="history-section" id="historySection">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📁 Saved Decisions History (Database)</h2>
+        <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.75rem;" onclick="loadDecisionHistory()">🔄 Refresh History</button>
+      </div>
+      <div id="historyGrid" class="history-grid">
+        <!-- History Cards Loaded via API -->
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
